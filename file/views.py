@@ -1,13 +1,13 @@
 from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
-from .serializers import UploadSerializer
+from .serializers import MultipleFileUploadSerializer
 from django.core.files.storage import FileSystemStorage
 from .models import File
 from face_recognition import compare_faces, face_encodings, load_image_file
 import os
 
 class UploadViewSet(ViewSet):
-    serializer_class = UploadSerializer
+    serializer_class = MultipleFileUploadSerializer
     
     def create(self, request):
         if request.method == 'POST':
@@ -31,12 +31,19 @@ class UploadViewSet(ViewSet):
         respones = "Invalid request method"
         return Response(response)
     
+
+class CompareViewSet(ViewSet):
+    serializer_class = MultipleFileUploadSerializer
+
     def compare(self, request):
         if request.method == 'POST':
             file_uploaded = request.FILES.get('compare')
-            file_uploaded_path = os.path.join('media/compare/', file_uploaded.name)
+            file_uploaded_path = os.path.join('compare/', file_uploaded.name)
 
-            compare_encoding = face_encodings(load_image_file(file_uploaded_path))[0]
+            fs = FileSystemStorage(location='compare/')
+            fs.save(file_uploaded.name, file_uploaded)
+
+            compare_encoding = face_encodings(load_image_file(file_uploaded_path))
 
             saved_images_folder = 'media/'
             saved_images_files = os.listdir(saved_images_folder)
