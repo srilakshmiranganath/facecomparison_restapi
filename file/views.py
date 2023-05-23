@@ -31,7 +31,7 @@ class CompareViewSet(ViewSet):
                 image_encoding = face_encodings(load_image_file(image_path))[0]
 
 
-                result = compare_faces([image_encoding], compare_encoding)
+                result = compare_faces([image_encoding], compare_encoding, tolerance=0.3)
                     #result = False
 
                 if result:
