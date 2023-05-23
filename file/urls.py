@@ -10,4 +10,5 @@ router.register(r'compare', CompareViewSet, basename="compare")
 
 urlpatterns = [
     path('', include(router.urls)),
-]
+    path('compare/', CompareViewSet.as_view({'post': 'compare'}), name='compare'),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

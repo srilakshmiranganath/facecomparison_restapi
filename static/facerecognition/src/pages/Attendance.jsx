@@ -19,10 +19,29 @@ const Attendance = () => {
 
         context.drawImage(video, 0, 0, videoWidth, videoHeight)
 
-        const base64data = canvas.toDataURL('image/png');
-        console.log(base64data);
+        // const base64data = canvas.toDataURL('image/png');
+        // console.log(base64data);
 
         
+        canvas.toBlob((blob) => {
+            const file = new File([blob], 'image.png', { type: 'image/png'});
+
+            const formData = new FormData();
+            formData.append('file', file);
+        
+
+            fetch('http://localhost:8000/compare/', {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+            })
+            .catch(error => {
+                console.error(error)
+            });
+        }, 'image/png');
     };
 
     return(
