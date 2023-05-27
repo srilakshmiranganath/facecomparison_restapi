@@ -18,4 +18,5 @@ from django.urls import path, include
 
 urlpatterns = [
     path(r"", include(("file.urls", "file"), namespace="api")),
+    path('admin/', admin.site.urls)
 ]

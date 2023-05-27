@@ -1,10 +1,11 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import Webcam from 'react-webcam';
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router-dom';
 
 const Attendance = () => {
     const webcamRef = useRef(null);
     const canvasRef = useRef(null);
+    const [comparisonResult, setComparisonResult] = useState(null);
 
     const handelCapture = () => {
         const webcam = webcamRef.current;
@@ -19,15 +20,11 @@ const Attendance = () => {
 
         context.drawImage(video, 0, 0, videoWidth, videoHeight)
 
-        // const base64data = canvas.toDataURL('image/png');
-        // console.log(base64data);
-
-        
         canvas.toBlob((blob) => {
-            const file = new File([blob], 'image.png', { type: 'image/png'});
+            const file = new File([blob], 'capture.png', { type: 'image/png'});
 
             const formData = new FormData();
-            formData.append('file', file);
+            formData.append('compare', file);
         
 
             fetch('http://localhost:8000/compare/', {
@@ -36,7 +33,7 @@ const Attendance = () => {
             })
             .then(response => response.json())
             .then(data => {
-                console.log(data);
+                setComparisonResult(data);
             })
             .catch(error => {
                 console.error(error)
@@ -59,6 +56,7 @@ const Attendance = () => {
                 />
             <button onClick={handelCapture}>CAPTURE</button>
             <canvas ref={canvasRef} style={{display: 'none'}}></canvas>
+            {comparisonResult && <p>{comparisonResult}</p>}
         </div>
     );
 };

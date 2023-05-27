@@ -12,36 +12,40 @@ class CompareViewSet(ViewSet):
     def compare(self, request):
         if request.method == 'POST':
             file_uploaded = request.FILES.get('compare')
-            file_uploaded_path = os.path.join('comparison/', file_uploaded.name)
+            if file_uploaded is not None:
+                file_uploaded_path = os.path.join('comparison/', 'capture.png')
 
-            fs = FileSystemStorage(location='comparison/')
-            fs.save(file_uploaded.name, file_uploaded)
+                if os.path.exists(file_uploaded_path):
+                    os.remove(file_uploaded_path)
 
-            compare_encodings = face_encodings(load_image_file(file_uploaded_path))
-            if len(compare_encodings) >0:
-                compare_encoding = compare_encodings[0]
+                fs = FileSystemStorage(location='comparison/')
+                fs.save('capture.png', file_uploaded)
+
+                compare_encodings = face_encodings(load_image_file(file_uploaded_path))
+                if len(compare_encodings) >0:
+                    compare_encoding = compare_encodings[0]
+                else:
+                    return Response("File not encoded")
+
+                saved_images_folder = 'media/'
+                saved_images_files = os.listdir(saved_images_folder)
+
+                for image_file in saved_images_files:
+                    image_path = os.path.join(saved_images_folder, image_file)
+                    image_encoding = face_encodings(load_image_file(image_path))[0]
+
+
+                    result = compare_faces([image_encoding], compare_encoding, tolerance=0.4)
+                        #result = False
+
+                    if result[0]:
+                        res = "Match found"
+                        return Response(res)
+                        
+                res = "Match not found"
+                return Response(res)
             else:
-                return Response("File not encoded")
-
-            saved_images_folder = 'media/'
-            saved_images_files = os.listdir(saved_images_folder)
-
-            for image_file in saved_images_files:
-                image_path = os.path.join(saved_images_folder, image_file)
-                image_encoding = face_encodings(load_image_file(image_path))[0]
-
-
-                result = compare_faces([image_encoding], compare_encoding, tolerance=0.3)
-                    #result = False
-
-                if result:
-                    res = "Match found"
-                    return Response(res)
-                    # else:
-                    #     print("not found")
-                    
-            res = "Match not found"
-            return Response(res)
+                return Response("No file uploaded")
 
 class UploadViewSet(ViewSet):
     serializer_class = MultipleFileUploadSerializer
